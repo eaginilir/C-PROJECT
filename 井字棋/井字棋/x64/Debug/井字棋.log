@@ -1,0 +1,12 @@
+﻿  源.cpp
+C:\Users\22302\Desktop\程序设计作业\井字棋\源.cpp(74,35): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\22302\Desktop\程序设计作业\井字棋\源.cpp(74,20): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\22302\Desktop\程序设计作业\井字棋\源.cpp(77,47): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\22302\Desktop\程序设计作业\井字棋\源.cpp(77,32): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\22302\Desktop\程序设计作业\井字棋\源.cpp(77,23): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\22302\Desktop\程序设计作业\井字棋\源.cpp(77,14): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\22302\Desktop\程序设计作业\井字棋\源.cpp(78,47): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\22302\Desktop\程序设计作业\井字棋\源.cpp(78,38): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\22302\Desktop\程序设计作业\井字棋\源.cpp(78,29): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\22302\Desktop\程序设计作业\井字棋\源.cpp(78,14): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+  井字棋.vcxproj -> C:\Users\22302\Desktop\程序设计作业\井字棋\x64\Debug\井字棋.exe
