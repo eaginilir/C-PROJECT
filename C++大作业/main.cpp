@@ -9,6 +9,8 @@ const int window_height = 720;
 const int button_width = 192;
 const int button_height = 75;
 
+const double pi = 3.14159;
+
 
 //渲染画面
 #pragma comment(lib,"MSIMG32.LIB")
@@ -378,13 +380,20 @@ public:
 		fillcircle(position.x, position.y, RADIUS);
 	};
 
-
 private:
 	const int RADIUS = 10;
+};
 
+//定义圆周子弹
+class circle_bullet :public Bullet
+{
+	const int RADIUS = 10;
+};
 
-
-
+//定义直线子弹
+class line_bullet :public Bullet
+{	
+	const int RADIUS = 10;
 };
 
 //定义Enemy类
@@ -541,12 +550,12 @@ void generate_enemy(std::vector<Enemy*>& enemy_list)
 	}
 }
 
-//更新子弹位置
+//更新螺旋子弹位置
 void update_bullets(std::vector<Bullet>& bullet_list, const Player& player)
 {
 	const double radial_speed = 0.0045;//径向速度
 	const double tangent_speed = 0.0055;//切向速度
-	double radian_interval = 2 * 3.14159 / bullet_list.size();//子弹之间的弧度间隔
+	double radian_interval = 2 * pi / bullet_list.size();//子弹之间的弧度间隔
 	POINT player_position = player.get_position();
 	double radius = 100 + 25 * sin(GetTickCount() * radial_speed);
 	for (size_t i = 0; i < bullet_list.size(); i++)
@@ -554,6 +563,36 @@ void update_bullets(std::vector<Bullet>& bullet_list, const Player& player)
 		double radian = GetTickCount() * tangent_speed + radian_interval * i;//当前子弹所在弧度
 		bullet_list[i].position.x = player_position.x + player.frame_width / 2 + (int)(radius * sin(radian));
 		bullet_list[i].position.y = player_position.y + player.frame_height / 2 + (int)(radius * cos(radian));
+	}
+}
+
+//更新圆周子弹位置
+void update_bullets(std::vector<circle_bullet>& circle_bullet_list, const Player& player)
+{
+	const double tangent_speed = 0.002;//切向速度
+	double radian_interval = 2 * pi / circle_bullet_list.size();//子弹间隔弧度
+	POINT player_position = player.get_position();
+	double radius = 100;
+	for (size_t i = 0; i < circle_bullet_list.size(); i++)
+	{
+		double radian = GetTickCount() * tangent_speed + radian_interval * i;//子弹所在弧度
+		circle_bullet_list[i].position.x = player_position.x + player.frame_width / 2 + (int)(radius * sin(radian));
+		circle_bullet_list[i].position.y = player_position.y + player.frame_height / 2 + (int)(radius * cos(radian));
+	}
+}
+
+//更新直线子弹位置
+void update_bullets(std::vector<line_bullet>& line_bullet_list, const Player& player)
+{
+	const double radial_speed = 0.001;//径向速度
+	double radian_interval = 2 * pi / line_bullet_list.size();//子弹间隔弧度
+	POINT player_position = player.get_position();
+	double radius = 200 + 30 * sin(GetTickCount() * radial_speed);
+	for (size_t i = 0; i < line_bullet_list.size(); i++)
+	{
+		double radian = radian_interval * i;
+		line_bullet_list[i].position.x = player_position.x + player.frame_width / 2 + (int)(radius * sin(radian));
+		line_bullet_list[i].position.y = player_position.y + player.frame_height / 2 + (int)(radius * cos(radian));
 	}
 }
 
@@ -568,10 +607,28 @@ void draw_player_score(int score)
 	outtextxy(10, 10, text);
 }
 
+//绘制玩家等级
+void draw_player_grade(int grade)
+{
+	static TCHAR text[64];
+	_stprintf_s(text, _T("当前玩家等级:%d"), grade);
+
+	setbkmode(TRANSPARENT);
+	settextcolor(RGB(255, 85, 185));
+	outtextxy(10, 30, text);
+}
+
 int main()
 {
 	//创建窗口
 	initgraph(1280, 720);
+
+
+	//加载音乐并取名
+	mciSendString(_T("open mus/bgm.mp3 alias bgm"), NULL, 0, NULL);
+	mciSendString(_T("open mus/hit.wav alias hit"), NULL, 0, NULL);
+
+	mciSendString(_T("play bgm repeat from 0"), NULL, 0, NULL);
 
 	atlas_player_left = new Atlas(_T("img/player_left_%d.png"), 6);
 	atlas_player_right = new Atlas(_T("img/player_right_%d.png"), 6);
@@ -580,12 +637,15 @@ int main()
 
 	//定义变量
 	int score = 0;
+	int grade = 1;//定义等级
 	ExMessage msg;
 	IMAGE background;
 	Player player;
 	IMAGE img_menu;
 	std::vector<Enemy*> enemy_list;
 	std::vector<Bullet> bullet_list(3);
+	std::vector<circle_bullet> circle_bullet_list(3);
+	std::vector<line_bullet> line_bullet_list(3);
 
 
 
@@ -632,11 +692,14 @@ int main()
 		{
 			player.move();
 			update_bullets(bullet_list, player);
+			update_bullets(circle_bullet_list, player);
+			update_bullets(line_bullet_list, player);
 			generate_enemy(enemy_list);
 			for (Enemy* enemy : enemy_list)
 			{
 				enemy->move(player);
 			}
+
 			//检测和玩家碰撞
 			for (Enemy* enemy : enemy_list)
 			{
@@ -657,13 +720,32 @@ int main()
 				{
 					if (enemy->check_bullet_collision(bullet))
 					{
+						mciSendString(_T("play hit from 0"), NULL, 0, NULL);
+						enemy->hurt();
+						score++;
+					}
+				}
+				for (const Bullet& bullet : circle_bullet_list)
+				{
+					if (enemy->check_bullet_collision(bullet))
+					{
+						mciSendString(_T("play hit from 0"), NULL, 0, NULL);
+						enemy->hurt();
+						score++;
+					}
+				}
+				for (const Bullet& bullet : line_bullet_list)
+				{
+					if (enemy->check_bullet_collision(bullet))
+					{
+						mciSendString(_T("play hit from 0"), NULL, 0, NULL);
 						enemy->hurt();
 						score++;
 					}
 				}
 			}
 
-			//清楚生命值为0的敌人
+			//清除生命值为0的敌人
 			for (size_t i = 0; i < enemy_list.size(); i++)
 			{
 				Enemy* enemy = enemy_list[i];
@@ -696,7 +778,16 @@ int main()
 			{
 				bullet.draw();
 			}
+			for (const circle_bullet& circle_bullet : circle_bullet_list)
+			{
+				circle_bullet.draw();
+			}
+			for (const line_bullet& line_bullet : line_bullet_list)
+			{
+				line_bullet.draw();
+			}
 			draw_player_score(score);
+			draw_player_grade(grade);
 		}
 		else
 		{
