@@ -100,6 +100,7 @@ int main()
 	BeginBatchDraw();
 	while (running)
 	{
+		DWORD start_time = GetTickCount();
 		while (peekmessage(&msg))
 		{
 			if (msg.message == WM_LBUTTONDOWN)
@@ -141,6 +142,12 @@ int main()
 		{
 			MessageBox(GetHWnd(), _T("draw"), _T("game over"), MB_OK);
 			running = false;
+		}
+		DWORD end_time = GetTickCount();
+		DWORD delta_time = end_time - start_time;
+		if (delta_time < 1000 / 60)
+		{
+			Sleep(1000 / 60 - delta_time);
 		}
 	}
 	EndBatchDraw();
