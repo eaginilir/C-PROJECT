@@ -1,11 +1,11 @@
-#include<graphics.h>
+#include<easyx.h>
 char board_data[3][3] = {
 	{'-','-','-'},
 	{'-','-','-'},
 	{'-','-','-'},
 };
 char current_piece = 'O';
-bool checkwin(char c)
+bool checkwin(char c)//≈–∂œ ‰”Æ
 {
 	if (board_data[0][0] == c && board_data[0][1] == c && board_data[0][2] == c)
 	{
@@ -41,7 +41,7 @@ bool checkwin(char c)
 	}
 	return false;
 }
-bool checkdraw()
+bool checkdraw()//≈–∂œ∆Ωæ÷
 {
 	for (size_t i = 0; i < 3; i++)
 	{
@@ -55,14 +55,14 @@ bool checkdraw()
 	}
 	return true;
 }
-void drawboard()
+void drawboard()//ªÊ÷∆∆Â≈Ã
 {
 	line(0, 200, 600, 200);
 	line(0, 400, 600, 400);
 	line(200, 0, 200, 600);
 	line(400, 0, 400, 600);
 }
-void drawpiece()
+void drawpiece()//ªÊ÷∆∆Â◊”
 {
 	for (size_t i = 0; i < 3; i++)
 	{

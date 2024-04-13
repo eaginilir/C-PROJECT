@@ -220,6 +220,27 @@ private:
 
 };
 
+//定义Bullet类
+class Bullet
+{
+public:
+	POINT position = { 0,0 };
+
+public:
+	Bullet() = default;
+	~Bullet() = default;
+
+	void draw() const
+	{
+		setlinecolor(RGB(255, 155, 50));
+		setfillcolor(RGB(200, 75, 10));
+		fillcircle(position.x, position.y, RADIUS);
+	};
+
+private:
+	const int RADIUS = 10;
+};
+
 //定义Player类
 class Player
 {
@@ -361,27 +382,6 @@ private:
 	bool is_move_left = false;
 	bool is_move_right = false;
 
-};
-
-//定义Bullet类
-class Bullet
-{
-public:
-	POINT position = { 0,0 };
-
-public:
-	Bullet() = default;
-	~Bullet() = default;
-
-	void draw() const
-	{
-		setlinecolor(RGB(255, 155, 50));
-		setfillcolor(RGB(200, 75, 10));
-		fillcircle(position.x, position.y, RADIUS);
-	};
-
-private:
-	const int RADIUS = 10;
 };
 
 //定义圆周子弹
