@@ -152,7 +152,6 @@ private:
 	{
 		return x >= region.left && x <= region.right && y >= region.top && y <= region.bottom;
 	};
-
 };
 
 //开始游戏按钮
@@ -254,6 +253,40 @@ public:
 
 private:
 	const int RADIUS = 10;
+};
+
+//定义 enemy_bullet类
+class enemy_bullet :public Bullet
+{
+public:
+
+	double normalized_x;
+	double normalized_y;
+
+public:
+
+	void set_x_and_y(double x, double y)
+	{
+		normalized_x = x;
+		normalized_y = y;
+	}
+
+	void init_x_and_y(int x, int y)
+	{
+		position.x = x;
+		position.y = y;
+	}
+
+	void draw()const
+	{
+		setlinecolor(RGB(255, 155, 50));
+		setfillcolor(RGB(255, 0, 0));
+		fillcircle(position.x, position.y, RADIUS);
+	};
+
+private:
+	const int RADIUS = 6;
+
 };
 
 //定义Player类
@@ -440,7 +473,7 @@ public:
 		loadimage(&img_shadow, _T("img/shadow_enemy.png"));
 		anim_left = new Animation(atlas_enemy_left, 45);
 		anim_right = new Animation(atlas_enemy_right, 45);
-		
+
 		//敌人生成边界
 		enum class SpawnEdge
 		{
@@ -547,14 +580,25 @@ public:
 		return alive;
 	};
 
+	//生成子弹
+	void generate_bullet(Player& player)
+	{
+		POINT player_poition = player.get_position();
+		int dir_x = position.x - player_poition.x;
+		int dir_y = position.y - player_poition.y;
+		double dir_len = sqrt(pow(dir_x, 2) + pow(dir_y, 2));
+		enemy_bullet new_bullet;
+		new_bullet.init_x_and_y(position.x, position.y);
+		new_bullet.set_x_and_y(dir_x / dir_len, dir_y / dir_len);
+		enemy_bullet_list.push_back(new_bullet);
+	}
 
-
-private:
+public:
 	const int speed = 2;
 	const int frame_width = 80;
 	const int frame_height = 80;
 	const int shadow_width = 48;
-
+	std::vector<enemy_bullet>enemy_bullet_list;
 
 private:
 	IMAGE img_shadow;
@@ -563,7 +607,7 @@ private:
 	POINT position = { 0,0 };
 	bool facing_left = false;
 	bool alive = true;
-
+	friend enemy_bullet;
 
 };
 
@@ -609,6 +653,17 @@ void update_bullets(std::vector<circle_bullet>& circle_bullet_list, const Player
 	}
 }
 
+//更新敌人子弹位置
+void update_enemy_bullet(std::vector<enemy_bullet>& enemy_bullet_list)
+{
+	const int speed = 0.5;
+	for (size_t i = 0; i < enemy_bullet_list.size(); i++)
+	{
+		enemy_bullet_list[i].position.x += enemy_bullet_list[i].normalized_x * speed;
+		enemy_bullet_list[i].position.y += enemy_bullet_list[i].normalized_y * speed;
+	}
+}
+
 //绘制玩家得分
 void draw_player_score(int score)
 {
@@ -629,6 +684,15 @@ void draw_player_grade(int grade)
 	setbkmode(TRANSPARENT);
 	settextcolor(RGB(255, 85, 185));
 	outtextxy(10, 30, text);
+}
+
+//检测玩家与敌人子弹是否相碰
+bool check_collition(Player &player,const enemy_bullet bullet)
+{
+	POINT player_position = player.get_position();
+	bool is_overlap_x = bullet.position.x >= player_position.x && bullet.position.x <= player_position.x + player.frame_width;
+	bool is_overlap_y = bullet.position.y >= player_position.y && bullet.position.y <= player_position.y + player.frame_height;
+	return is_overlap_x && is_overlap_y;
 }
 
 int main()
@@ -704,12 +768,32 @@ int main()
 			//更新子弹位置 
 			update_bullets(player.bullet_list, player);
 			update_bullets(player.circle_bullet_list, player);
-
+			for (size_t i = 0; i < enemy_list.size(); i++)
+			{
+				update_enemy_bullet(enemy_list[i]->enemy_bullet_list);
+			}
 
 			generate_enemy(enemy_list);
-			for (Enemy* enemy : enemy_list)
+			for (size_t i = 0; i < enemy_list.size(); i++)
 			{
-				enemy->move(player);
+				enemy_list[i]->move(player);
+				enemy_list[i]->generate_bullet(player);
+			}
+
+			//检测玩家和敌人子弹相碰
+			for (size_t i = 0; i < enemy_list.size(); i++)
+			{
+				for (size_t j = 0; j < enemy_list[i]->enemy_bullet_list.size(); j++)
+				{
+					if (check_collition(player, enemy_list[i]->enemy_bullet_list[j]))
+					{
+						static TCHAR text[128];
+						_stprintf_s(text, _T("最终得分:%d!"), score);
+						MessageBox(GetHWnd(), text, _T("游戏结束"), MB_OK);
+						running = false;
+						break;
+					}
+				}
 			}
 
 			//检测和玩家碰撞
@@ -785,9 +869,13 @@ int main()
 		{
 			putimage_alpha(0, 0, &background);
 			player.draw(1000 / 144);
-			for (Enemy* enemy : enemy_list)
+			for (size_t i = 0; i < enemy_list.size(); i++)
 			{
-				enemy->draw(1000 / 144);
+				enemy_list[i]->draw(1000 / 144);
+				for (size_t j = 0; j < enemy_list[i]->enemy_bullet_list.size(); j++)
+				{
+					enemy_list[i]->enemy_bullet_list[j].draw();
+				}
 			}
 			for (const Bullet& bullet : player.bullet_list)
 			{
