@@ -1,5 +1,4 @@
 ﻿  main.cpp
-C:\Users\22302\gitrepo\C-PROJECT\C++大作业\main.cpp(659,20): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
-C:\Users\22302\gitrepo\C-PROJECT\C++大作业\main.cpp(662,72): warning C4244: “+=”: 从“double”转换到“LONG”，可能丢失数据
-C:\Users\22302\gitrepo\C-PROJECT\C++大作业\main.cpp(663,72): warning C4244: “+=”: 从“double”转换到“LONG”，可能丢失数据
+C:\Users\22302\gitrepo\C-PROJECT\C++大作业\main.cpp(695,74): warning C4244: “+=”: 从“double”转换到“LONG”，可能丢失数据
+C:\Users\22302\gitrepo\C-PROJECT\C++大作业\main.cpp(696,74): warning C4244: “+=”: 从“double”转换到“LONG”，可能丢失数据
   C++大作业.vcxproj -> C:\Users\22302\gitrepo\C-PROJECT\C++大作业\x64\Debug\C++大作业.exe
