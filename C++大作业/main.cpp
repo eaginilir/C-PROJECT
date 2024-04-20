@@ -645,9 +645,9 @@ private:
 };
 
 //生成新敌人
-void generate_enemy(std::vector<Enemy*>& enemy_list)
+void generate_enemy(std::vector<Enemy*>& enemy_list,Player &player)
 {
-	const int interval = 100;
+	const int interval = 100-3*player.grade;
 	static int counter = 0;
 	if ((++counter) % interval == 0)
 	{
@@ -795,7 +795,7 @@ int main()
 			update_bullets(player.circle_bullet_list, player);
 			update_bullets(enemy_bullet_list);
 
-			generate_enemy(enemy_list);
+			generate_enemy(enemy_list,player);
 			for (Enemy* enemy : enemy_list)
 			{
 				enemy->move(player);
@@ -817,7 +817,7 @@ int main()
 				{
 					static TCHAR text[128];
 					_stprintf_s(text, _T("最终得分:%d!"), score);
-					MessageBox(GetHWnd(),text, _T("游戏结束"), MB_OK);
+					MessageBox(GetHWnd(),text, _T("对不起，你没能打赢复活赛！"), MB_OK);
 					running = false;
 					break;
 				}
@@ -830,7 +830,7 @@ int main()
 				{
 					static TCHAR text[128];
 					_stprintf_s(text, _T("最终得分:%d!"), score);
-					MessageBox(GetHWnd(), text, _T("游戏结束"), MB_OK);
+					MessageBox(GetHWnd(), text, _T("对不起，你没能打赢复活赛！"), MB_OK);
 					running = false;
 					break;
 				}
