@@ -419,6 +419,7 @@ public:
 	std::vector<Bullet> bullet_list;
 	std::vector<circle_bullet> circle_bullet_list;
 	int grade = 1;//定义等级
+	int hp = 100;//定义血量
 
 private:
 	IMAGE img_shadow;
@@ -719,6 +720,15 @@ void draw_player_grade(int grade)
 	outtextxy(10, 30, text);
 }
 
+//绘制玩家血量
+void draw_player_hp(Player& player)
+{
+	setlinecolor(RGB(255, 255, 255));
+	setfillcolor(RGB(255, 0, 0));
+	rectangle(10, 50, 210, 60);
+	fillrectangle(10, 50, 10 + 2*player.hp, 60);
+}
+
 int main()
 {
 	//创建窗口
@@ -811,15 +821,23 @@ int main()
 			}
 
 			//检测敌人和玩家碰撞
-			for (Enemy* enemy : enemy_list)
+			for (size_t i=0;i<enemy_list.size();i++)
 			{
-				if (enemy->check_player_collision(player))
+				if (enemy_list[i]->check_player_collision(player))
 				{
-					static TCHAR text[128];
-					_stprintf_s(text, _T("最终得分:%d!"), score);
-					MessageBox(GetHWnd(),text, _T("对不起，你没能打赢复活赛！"), MB_OK);
-					running = false;
-					break;
+					Enemy* this_enemy = enemy_list[i];
+					std::swap(enemy_list[i], enemy_list.back());
+					enemy_list.pop_back();
+					delete this_enemy;
+					player.hp = player.hp - 20;
+					if (player.hp <= 0)
+					{
+						static TCHAR text[128];
+						_stprintf_s(text, _T("最终得分:%d!"), score);
+						MessageBox(GetHWnd(), text, _T("对不起，你没能打赢复活赛！"), MB_OK);
+						running = false;
+						break;
+					}
 				}
 			}
 
@@ -828,11 +846,19 @@ int main()
 			{
 				if (enemy_bullet_list[i]->check_player_collision(player))
 				{
-					static TCHAR text[128];
-					_stprintf_s(text, _T("最终得分:%d!"), score);
-					MessageBox(GetHWnd(), text, _T("对不起，你没能打赢复活赛！"), MB_OK);
-					running = false;
-					break;
+					enemy_bullet* bullet = enemy_bullet_list[i];
+					std::swap(enemy_bullet_list[i], enemy_bullet_list.back());
+					enemy_bullet_list.pop_back();
+					delete bullet;
+					player.hp = player.hp - 10;
+					if (player.hp<=0) 
+					{
+						static TCHAR text[128];
+						_stprintf_s(text, _T("最终得分:%d!"), score);
+						MessageBox(GetHWnd(), text, _T("对不起，你没能打赢复活赛！"), MB_OK);
+						running = false;
+						break;
+					}
 				}
 			}
 
@@ -925,9 +951,10 @@ int main()
 				enemy_bullet->draw();
 			}
 
-			//绘制玩家分数和等级
+			//绘制玩家分数、等级和血量
 			draw_player_score(score);
 			draw_player_grade(player.grade);
+			draw_player_hp(player);
 		}
 		else
 		{
