@@ -2,7 +2,7 @@
 #include<string>
 #include<vector>
 #include<windows.h>
-#include<math.h>
+#include<cmath>
 
 const int window_width = 1280;
 const int window_height = 720;
@@ -296,6 +296,9 @@ public:
 			case 'D':
 				is_move_right = true;
 				break;
+			case VK_SPACE:
+				skill = true;
+				break;
 			default:
 				break;
 			}
@@ -314,6 +317,9 @@ public:
 				break;
 			case 'D':
 				is_move_right = false;
+				break;
+			case VK_SPACE:
+				skill = false;
 				break;
 			default:
 				break;
@@ -409,6 +415,12 @@ public:
 		}
 	}
 
+	bool release_skill()
+	{
+		return skill && sp == 100;
+	}
+	
+
 public:
 	const int speed = 3;
 	const int frame_width = 80;
@@ -420,6 +432,7 @@ public:
 	std::vector<circle_bullet> circle_bullet_list;
 	int grade = 1;//定义等级
 	int hp = 100;//定义血量
+	int sp = 0;//定义能量
 
 private:
 	IMAGE img_shadow;
@@ -430,6 +443,11 @@ private:
 	bool is_move_down = false;
 	bool is_move_left = false;
 	bool is_move_right = false;
+	//bool is_defend = false;//盾反机制（或者简单点不做反弹直接吸收算了）
+	//或者是设计技能，将一定范围内的子弹静止，技能结束后将它们直接索敌击杀敌人
+	//设计成按下空格释放技能（击杀敌人课回复能量/或者改成随时间回复能量，回复满可释放技能）
+	//这个有点太难了，现在觉得可以设计一个清除全场敌人子弹并且发射一圈很密集的子弹直接秒杀敌人的技能（这样也许会比较爽）
+	bool skill = false;
 	friend Bullet;
 	friend circle_bullet;
 
@@ -648,7 +666,7 @@ private:
 //生成新敌人
 void generate_enemy(std::vector<Enemy*>& enemy_list,Player &player)
 {
-	const int interval = 100-3*player.grade;
+	const int interval = max(100 - 3 * player.grade, 1);
 	static int counter = 0;
 	if ((++counter) % interval == 0)
 	{
@@ -729,6 +747,25 @@ void draw_player_hp(Player& player)
 	fillrectangle(10, 50, 10 + 2*player.hp, 60);
 }
 
+//绘制玩家能量条
+void draw_player_sp(Player& player)
+{
+	setlinecolor(RGB(255, 255, 255));
+	setfillcolor(RGB(0, 0, 255));
+	rectangle(10, 80, 210, 90);
+	fillrectangle(10, 80, min(10 + 2 * player.sp,210), 90);
+}
+
+//绘制玩家释放技能动画
+void draw_skill(Player& player,std::vector<enemy_bullet*>&enemy_bullet_list)
+{
+	for (auto& bullet : enemy_bullet_list)
+	{
+		delete bullet;
+	}
+	enemy_bullet_list.clear();
+}
+
 int main()
 {
 	//创建窗口
@@ -799,7 +836,7 @@ int main()
 		if (is_game_started)
 		{
 			player.move();
-			
+
 			//更新子弹位置 
 			update_bullets(player.bullet_list, player);
 			update_bullets(player.circle_bullet_list, player);
@@ -809,6 +846,7 @@ int main()
 			for (Enemy* enemy : enemy_list)
 			{
 				enemy->move(player);
+				//敌人生成子弹
 				if (enemy->check_time())
 				{
 					enemy_bullet* new_bullet = new enemy_bullet();
@@ -872,6 +910,7 @@ int main()
 						mciSendString(_T("play hit from 0"), NULL, 0, NULL);
 						enemy->hurt();
 						score++;
+						player.sp = min(player.sp + 10, 100);
 						//更新玩家等级
 						if (score % 10 == 0)
 						{
@@ -887,6 +926,7 @@ int main()
 						mciSendString(_T("play hit from 0"), NULL, 0, NULL);
 						enemy->hurt();
 						score++;
+						player.sp = min(player.sp + 10, 100);
 						//更新玩家等级
 						if (score % 10 == 0)
 						{
@@ -919,6 +959,13 @@ int main()
 					enemy_list.pop_back();
 					delete enemy;
 				}
+			}
+
+			//检测玩家是否释放技能
+			if (player.release_skill())
+			{
+				draw_skill(player, enemy_bullet_list);
+				player.sp = 0;
 			}
 		}
 
@@ -955,6 +1002,7 @@ int main()
 			draw_player_score(score);
 			draw_player_grade(player.grade);
 			draw_player_hp(player);
+			draw_player_sp(player);
 		}
 		else
 		{
