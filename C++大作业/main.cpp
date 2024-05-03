@@ -423,8 +423,8 @@ public:
 
 public:
 	const int speed = 3;
-	const int frame_width = 80;
-	const int frame_height = 80;
+	const int frame_width = 55;
+	const int frame_height = 92;
 	const int shadow_width = 32;
 	const int window_width = 1280;
 	const int window_height = 720;
@@ -647,8 +647,8 @@ public:
 	bool check_player_collision(Player& player)
 	{
 		POINT player_position = player.get_position();
-		bool is_collision_x = position.x > player_position.x + 15 && position.x < player_position.x + 65;
-		bool is_colloision_y= position.y > player_position.y + 15 && position.y < player_position.y + 65;
+		bool is_collision_x = position.x > player_position.x + 5 && position.x < player_position.x + 35;
+		bool is_colloision_y= position.y > player_position.y && position.y < player_position.y + 80;
 		return is_collision_x && is_colloision_y;
 	}
 
@@ -666,7 +666,7 @@ private:
 //生成新敌人
 void generate_enemy(std::vector<Enemy*>& enemy_list,Player &player)
 {
-	const int interval = max(100 - 3 * player.grade, 1);
+	const int interval = max(100 - 3 * player.grade, 10);
 	static int counter = 0;
 	if ((++counter) % interval == 0)
 	{
@@ -759,6 +759,7 @@ void draw_player_sp(Player& player)
 //绘制玩家释放技能动画
 void draw_skill(Player& player,std::vector<enemy_bullet*>&enemy_bullet_list)
 {
+	player.hp = min(100, player.hp + 10);
 	for (auto& bullet : enemy_bullet_list)
 	{
 		delete bullet;
@@ -769,7 +770,7 @@ void draw_skill(Player& player,std::vector<enemy_bullet*>&enemy_bullet_list)
 int main()
 {
 	//创建窗口
-	initgraph(1280, 720);
+	initgraph(1080, 720);
 
 
 	//加载音乐并取名
@@ -780,8 +781,8 @@ int main()
 
 	atlas_player_left = new Atlas(_T("img/player_left_%d.png"), 6);
 	atlas_player_right = new Atlas(_T("img/player_right_%d.png"), 6);
-	atlas_enemy_left = new Atlas(_T("img/enemy_left_%d.png"), 6);
-	atlas_enemy_right = new Atlas(_T("img/enemy_right_%d.png"), 6);
+	atlas_enemy_left = new Atlas(_T("img/enemy_left_%d.png"), 3);
+	atlas_enemy_right = new Atlas(_T("img/enemy_right_%d.png"), 3);
 
 	//定义变量
 	int score = 0;
@@ -797,14 +798,14 @@ int main()
 
 	RECT region_btn_start_game, region_btn_quit_game;
 
-	region_btn_start_game.left = (window_width - button_width) / 2;
+	region_btn_start_game.left = (window_width - button_width) / 2 + 240;
 	region_btn_start_game.right = region_btn_start_game.left + button_width;
-	region_btn_start_game.top = 430;
+	region_btn_start_game.top = 330;
 	region_btn_start_game.bottom = region_btn_start_game.top + button_height;
 
-	region_btn_quit_game.left = (window_width - button_width) / 2;
+	region_btn_quit_game.left = (window_width - button_width) / 2 + 240;
 	region_btn_quit_game.right = region_btn_quit_game.left + button_width;
-	region_btn_quit_game.top = 550;
+	region_btn_quit_game.top = 450;
 	region_btn_quit_game.bottom = region_btn_quit_game.top + button_height;
 
 	StartGameButton btn_start_game = StartGameButton(region_btn_start_game,
@@ -814,7 +815,7 @@ int main()
 
 
 	loadimage(&img_menu, _T("img/menu.png"));
-	loadimage(&background, _T("img/background.jpg"));
+	loadimage(&background, _T("img/background.png"));
 	BeginBatchDraw();
 
 	while (running)
@@ -964,7 +965,7 @@ int main()
 			//检测玩家是否释放技能
 			if (player.release_skill())
 			{
-				draw_skill(player, enemy_bullet_list);
+				draw_skill(player,enemy_bullet_list);
 				player.sp = 0;
 			}
 		}
@@ -1006,7 +1007,7 @@ int main()
 		}
 		else
 		{
-			putimage(0, 0, &img_menu);
+			putimage(0, 0,&img_menu);
 			btn_start_game.Draw();
 			btn_quit_game.Draw();
 		}
