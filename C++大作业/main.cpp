@@ -13,13 +13,14 @@ const int button_height = 75;
 const double pi = 3.14159;
 
 
-//渲染画面
+
 #pragma comment(lib,"MSIMG32.LIB")
 #pragma comment(lib,"Winmm.lib")
 
 bool is_game_started = false;
 bool running = true;
 
+//渲染画面
 inline void putimage_alpha(int x, int y, IMAGE* img)
 {
 	int w = img->getwidth();
@@ -443,10 +444,6 @@ private:
 	bool is_move_down = false;
 	bool is_move_left = false;
 	bool is_move_right = false;
-	//bool is_defend = false;//盾反机制（或者简单点不做反弹直接吸收算了）
-	//或者是设计技能，将一定范围内的子弹静止，技能结束后将它们直接索敌击杀敌人
-	//设计成按下空格释放技能（击杀敌人课回复能量/或者改成随时间回复能量，回复满可释放技能）
-	//这个有点太难了，现在觉得可以设计一个清除全场敌人子弹并且发射一圈很密集的子弹直接秒杀敌人的技能（这样也许会比较爽）
 	bool skill = false;
 	friend Bullet;
 	friend circle_bullet;
@@ -756,7 +753,7 @@ void draw_player_sp(Player& player)
 	fillrectangle(10, 80, min(10 + 2 * player.sp,210), 90);
 }
 
-//绘制玩家释放技能动画
+//绘制玩家释放技能
 void draw_skill(Player& player,std::vector<enemy_bullet*>&enemy_bullet_list)
 {
 	player.hp = min(100, player.hp + 10);
